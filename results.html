@@ -51,23 +51,10 @@
       font-size: 20px;
       box-shadow: 0 0 25px rgba(255,215,0,0.8);
     }
-    .votes {
-      font-weight: 600;
-      font-size: 16px;
-    }
-    footer {
-      margin-top: 20px;
-      font-size: 13px;
-      color: #fff;
-      animation: fadeIn 1s ease;
-    }
+    footer { margin-top: 20px; font-size: 13px; color: #fff; }
     canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
-    
-    .actions {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-    }
+
+    .actions { margin: 20px 0; }
     #restartBtn {
       background: #ff6600;
       color: #fff;
@@ -78,12 +65,8 @@
       cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-    #restartBtn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
+    #restartBtn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
-    /* Animations */
     @keyframes fadeIn { from {opacity:0} to {opacity:1} }
     @keyframes fadeInDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
     @keyframes slideIn { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
@@ -103,83 +86,47 @@
   </div>
 
   <footer>Powered by ARYAN</footer>
-
   <canvas id="confetti"></canvas>
 
   <script>
     const rangolis = JSON.parse(localStorage.getItem('rangolis')) || [];
     const resultsDiv = document.getElementById('results');
-
-    // Sort by votes descending
     rangolis.sort((a,b)=>b.votes - a.votes);
-
     rangolis.forEach((r, i)=>{
       const card = document.createElement('div');
       card.className = 'rank-card';
-      if(i===0) card.classList.add('winner'); // highlight winner
-      card.style.animationDelay = (i*0.2)+"s"; // stagger animation
-      card.innerHTML = `<span>${i+1}. ${r.name}</span> <span class="votes">${r.votes} votes</span>`;
+      if(i===0) card.classList.add('winner');
+      card.style.animationDelay = (i*0.2)+"s";
+      card.innerHTML = `<span>${i+1}. ${r.name}</span> <span>${r.votes} votes</span>`;
       resultsDiv.appendChild(card);
     });
-
-    // Restart competition button
-    const restartBtn = document.getElementById('restartBtn');
-    restartBtn.addEventListener('click', () => {
-      rangolis.forEach(r => r.votes = 0);           // Reset votes
+    document.getElementById('restartBtn').onclick = ()=>{
+      rangolis.forEach(r=>r.votes=0);
       localStorage.setItem('rangolis', JSON.stringify(rangolis));
-      window.location.href = 'setup.html';         // Go back to setup
-    });
+      window.location.href='setup.html';
+    };
 
-    // Confetti animation
-    const canvas = document.getElementById('confetti');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const confettiPieces = [];
-    const colors = ['#ff0a54','#ff477e','#ff7096','#ff85a1','#fbb1b8','#f9bec7'];
-
-    for(let i=0; i<150; i++){
-      confettiPieces.push({
-        x: Math.random()*canvas.width,
-        y: Math.random()*canvas.height - canvas.height,
-        r: Math.random()*6+4,
-        d: Math.random()*10+2,
-        color: colors[Math.floor(Math.random()*colors.length)],
-        tilt: Math.random()*10-10,
-        tiltAngleIncremental: Math.random()*0.07+0.05,
-        tiltAngle: 0
-      });
+    // Confetti
+    const canvas=document.getElementById('confetti');
+    const ctx=canvas.getContext('2d');
+    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+    const pieces=[], colors=['#ff0a54','#ff477e','#ff7096','#ff85a1','#fbb1b8','#f9bec7'];
+    for(let i=0;i<150;i++){
+      pieces.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height-canvas.height,r:Math.random()*6+4,d:Math.random()*10+2,color:colors[Math.floor(Math.random()*colors.length)],tilt:Math.random()*10-10,ta:0,ti:Math.random()*0.07+0.05});
     }
-
-    function drawConfetti(){
+    function draw(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      confettiPieces.forEach(p=>{
-        ctx.beginPath();
-        ctx.lineWidth = p.r/2;
-        ctx.strokeStyle = p.color;
-        ctx.moveTo(p.x + p.tilt + p.r/4, p.y);
-        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/4);
+      for(const p of pieces){
+        ctx.beginPath(); ctx.lineWidth=p.r/2; ctx.strokeStyle=p.color;
+        ctx.moveTo(p.x+p.tilt+p.r/4,p.y);
+        ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/4);
         ctx.stroke();
-      });
-      updateConfetti();
+        p.ta+=p.ti; p.y+=(Math.cos(p.d)+3+p.r/2)/2; p.tilt=Math.sin(p.ta)*15;
+        if(p.y>canvas.height){p.y=-10; p.x=Math.random()*canvas.width;}
+      }
+      requestAnimationFrame(draw);
     }
-
-    function updateConfetti(){
-      confettiPieces.forEach(p=>{
-        p.tiltAngle += p.tiltAngleIncremental;
-        p.y += (Math.cos(p.d) + 3 + p.r/2)/2;
-        p.tilt = Math.sin(p.tiltAngle) * 15;
-
-        if(p.y > canvas.height){
-          p.y = -10;
-          p.x = Math.random()*canvas.width;
-        }
-      });
-      requestAnimationFrame(drawConfetti);
-    }
-
-    drawConfetti();
+    draw();
   </script>
 </body>
 </html>

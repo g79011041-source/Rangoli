@@ -64,7 +64,7 @@
   <h3>Rangoli Competition 2025</h3>
 
   <div class="container">
-    <h2>Enter Rangoli Names (9)</h2>
+    <h2>Enter Rangoli Names (8)</h2>
     <div id="inputs"></div>
     <button onclick="saveNames()">Continue to Voting</button>
   </div>
@@ -73,13 +73,13 @@
 
   <script>
     const inputDiv = document.getElementById('inputs');
-    for(let i=1; i<=9; i++){
+    for(let i=1; i<=8; i++){
       inputDiv.innerHTML += `<input id="rangoli${i}" placeholder="Rangoli ${i} name">`;
     }
 
     function saveNames(){
       const names = [];
-      for(let i=1; i<=9; i++){
+      for(let i=1; i<=8; i++){
         const val = document.getElementById('rangoli'+i).value.trim() || "Rangoli " + i;
         names.push({name: val, votes: 0});
       }
